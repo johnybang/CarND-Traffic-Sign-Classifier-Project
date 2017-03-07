@@ -20,7 +20,9 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./data_visualizations/num_examples_by_sign_type.png "Number of Examples by Sign Type"
+[image2.0]: ./data_visualizations/num_examples_by_sign_type.png "Number of Examples by Sign Type"
+[image2.1]: ./data_visualizations/16_random_training_images.png "16 Random Training Images with Sign Labels"
+[image4.0]: ./data_visualizations/16_grayscale_training_images.png "16 Grayscaled Training Images with Sign Labels"
 [image2]: ./examples/grayscale.jpg "Grayscaling"
 [image3]: ./examples/random_noise.jpg "Random Noise"
 [image4]: ./examples/placeholder.png "Traffic Sign 1"
@@ -57,9 +59,13 @@ signs data set:
 
 The code for this step is contained in the third code cell of the IPython notebook.  
 
-Here is an exploratory visualization of the data set. It is a bar chart showing how the data ...
+Here is an exploratory visualization of the data set. It is a bar chart showing how many examples of each sign type exist in the training, validation, and test sets.
 
-![alt text][image1]
+![Number of examples of each sign type][image2.0]
+
+And here is a grid of 16 random images from the test set, with sign type.
+
+![16 random test images][image2.1]
 
 ###Design and Test a Model Architecture
 
@@ -67,13 +73,17 @@ Here is an exploratory visualization of the data set. It is a bar chart showing 
 
 The code for this step is contained in the fourth code cell of the IPython notebook.
 
-As a first step, I decided to convert the images to grayscale because ...
+As a first step, I decided to convert the images to grayscale for a number of reasons:
 
-Here is an example of a traffic sign image before and after grayscaling.
+* It may make the system more robust to poor lighting conditions where color may not be reliable
+* It reduces the number of input features; all other factors held constant (number of layers, etc.), this could reduce risk of overfitting and makes the training/model run faster
+* [This paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) had some success with grayscale on this dataset
 
-![alt text][image2]
+Here are the same 16 images from above, after grayscaling.
 
-As a last step, I normalized the image data because ...
+![16 grayscaled training images][image4.0]
+
+As a last step, I normalized the image data because the machine learning algorithms that follow are better behaved with standard normally distributed features.
 
 ####2. Describe how, and identify where in your code, you set up training, validation and testing data. How much data was in each set? Explain what techniques were used to split the data into these sets. (OPTIONAL: As described in the "Stand Out Suggestions" part of the rubric, if you generated additional data for training, describe why you decided to generate additional data, how you generated the data, identify where in your code, and provide example images of the additional data)
 
