@@ -83,7 +83,7 @@ Here are the same 16 images from above, after grayscaling.
 
 ![16 grayscaled training images][image4.0]
 
-As a last step, I normalized the image data because the machine learning algorithms that follow are better behaved with standard normally distributed features.
+As a last step, I normalized the image data because the neural network that follows is better behaved with normalized features. For instance, the first layer with zero initialized biases, small zero-mean randomly initialized weights, and normalized features ensures that the first set of activation functions gradients will at least start in the 
 
 ####2. Describe how, and identify where in your code, you set up training, validation and testing data. How much data was in each set? Explain what techniques were used to split the data into these sets. (OPTIONAL: As described in the "Stand Out Suggestions" part of the rubric, if you generated additional data for training, describe why you decided to generate additional data, how you generated the data, identify where in your code, and provide example images of the additional data)
 
