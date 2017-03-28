@@ -1,0 +1,2 @@
+act_type,b_conv,b_fc,batch_size,best_epoch,best_iter,best_valid_accy,isgray,kp_conv,kp_fc,learn_rate,norm_type,run_time
+tanh,0.001,0.001,256,48,6528,0.964172335600907,False,1.0,0.5,0.002,MaxScaleMinusMean,2.762900876998901
