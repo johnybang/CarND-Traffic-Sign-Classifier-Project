@@ -2,7 +2,7 @@
 
 ##Overview
 
-###As a part of the Udacity Self-Driving Car Engineer Nanodegree program, we build a traffic sign recognition classifier using the German Traffic Sign Recognition Benchmark (GTSRB) dataset. The educational motive is to put into practice convolutional neural networks and deep learning. 
+###As a part of the Udacity Self-Driving Car Engineer Nanodegree program, I build a traffic sign recognition classifier using the German Traffic Sign Recognition Benchmark (GTSRB) dataset. The educational motive is to put into practice convolutional neural networks and deep learning on a classification task. 
 
 ---
 
@@ -20,9 +20,12 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image2.0]: ./data_visualizations/num_examples_by_sign_type.png "Number of Examples by Sign Type"
-[image2.1]: ./data_visualizations/16_random_training_images.png "16 Random Training Images with Sign Labels"
-[image4.0]: ./data_visualizations/16_grayscale_training_images.png "16 Grayscaled Training Images with Sign Labels"
+[image1.0]: ./data_visualizations/num_examples_by_sign_type.png "Number of Examples by Sign Type"
+[image1.1]: ./data_visualizations/16_random_training_images.jpg "16 Random Training Images with Sign Labels"
+[image2.0]: ./data_visualizations/4_original_training_images.jpg "4 Training Images with Sign Labels"
+[image2.1]: ./data_visualizations/4_grayscaled_training_images.jpg "4 Grayscaled Images with Sign Lables"
+[image3.0]: ./data_visualizations/original_training_image.jpg "Original Image"
+[image3.1]: ./data_visualizations/64_augmentation_examples.jpg "64 Augmentation Examples"
 [image2]: ./examples/grayscale.jpg "Grayscaling"
 [image3]: ./examples/random_noise.jpg "Random Noise"
 [image4]: ./examples/placeholder.png "Traffic Sign 1"
@@ -51,6 +54,7 @@ I used the pandas library to calculate summary statistics of the traffic
 signs data set:
 
 * The size of training set is 34799
+* The size of validation set is 4410
 * The size of test set is 12630
 * The shape of a traffic sign image is (32, 32, 3)
 * The number of unique classes/labels in the data set is 43
@@ -59,48 +63,66 @@ signs data set:
 
 The code for this step is contained in the third code cell of the IPython notebook.  
 
-Here is an exploratory visualization of the data set. It is a bar chart showing how many examples of each sign type exist in the training, validation, and test sets.
+Here is an exploratory visualization of the data set. It is a bar chart showing how many examples of each sign type exist in the training, validation, and test sets. The nonuniform distribution of sign types is representative of the prior probability of encountering such signs in a typical driving scenario. Therefore, the nonuniform class distribution is a desireable property of this dataset.
 
-![Number of examples of each sign type][image2.0]
+![Number of examples of each sign type][image1.0]
 
 And here is a grid of 16 random images from the test set, with sign type.
 
-![16 random test images][image2.1]
+![16 random test images][image1.1]
 
 ###Design and Test a Model Architecture
 
 ####1. Describe how, and identify where in your code, you preprocessed the image data. What tecniques were chosen and why did you choose these techniques? Consider including images showing the output of each preprocessing technique. Pre-processing refers to techniques such as converting to grayscale, normalization, etc.
 
-The code for this step is contained in the fourth code cell of the IPython notebook.
+The code for this step is contained in the fourth code cell of the IPython notebook. I define several helper functions for preprocessing which will be used during the training experiments. The actual preprocessing occurs at experimentation runtime so that I can programmatically permute several different preprocessing options, but I provide a few visual examples and motivations below.
 
-As a first step, I decided to convert the images to grayscale for a number of reasons:
+#####Grayscale
+I decided to experiment with grayscale for a number of reasons:
 
 * It may make the system more robust to poor lighting conditions where color may not be reliable
-* It reduces the number of input features; all other factors held constant (number of layers, etc.), this could reduce risk of overfitting and makes the training/model run faster
+* It reduces the number of input features. With all other factors held constant (number of layers, etc.), this could reduce risk of overfitting and makes the training/model run faster
 * [This paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) had some success with grayscale on this dataset
 
-Here are the same 16 images from above, after grayscaling.
+Here are 4 training images before and after grayscaling.
 
-![16 grayscaled training images][image4.0]
+![4 original training images][image2.0]
+![4 grayscaled training images][image2.1]
 
-As a last step, I normalized the image data because the neural network that follows is better behaved with normalized features. For instance, the first layer with zero initialized biases, small zero-mean randomly small initialized weights, and normalized features ensures that the first set of activation functions gradients will at least start in the s
+#####Normalization
+Normalization a common first step in machine learning for making sure that the input features are similar in scale and zero mean due to the behavior and statistical assumptions of various machine learning algorithms. Ignoring this concern can lead to slow convergence or lack of convergence.
+
+In our case, relative scale isn't really a concern since all the pixels are on the same scale. However, depending on architectural elements like activation function, different normalization (and initialization) strategies can be used. We wish to enable our neural network to adapt efficiently and avoid common problems like "dead units" which can occur when the gradient of a particular node approaches zero. For example, sigmoid's gradient approaches zero at +-infinity which motivates zero mean features. Relu, instead has zero gradient when less than zero and a constant gradient above zero so I'm motivated to find out if zero-mean is necessary for relu. To that end, I made a helper function to try 3 different normalization approaches for my own edification:
+
+1. MaxScale: Scale by max possible pixel value (255) so the range is (0,1)
+2. MaxScaleMinusMean: MaxScale then subtract the mean so the range is (-0.5, 0.5)
+3. ImageStandardize: Treating all channels of pixels as one statistical group, standardize the distribution of pixels within each image. (A possibly naive attempt to reduce the effect of abnormally bright or dark images.)
 
 ####2. Describe how, and identify where in your code, you set up training, validation and testing data. How much data was in each set? Explain what techniques were used to split the data into these sets. (OPTIONAL: As described in the "Stand Out Suggestions" part of the rubric, if you generated additional data for training, describe why you decided to generate additional data, how you generated the data, identify where in your code, and provide example images of the additional data)
 
-The code for splitting the data into training and validation sets is contained in the fifth code cell of the IPython notebook.  
+##### Train/Validation Split
+In the latest version of this project template, the training/validation split is already done by the Udacity instructor, so that aspect of the question is no longer relevant. The pickle files return training, validation and test sets. If that hadn't been the case, I probably would have aimed for a 80/20 split on training vs validation. Interestingly, [this paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) pointed out that it must be done carefully in order to avoid accidently having highly correlated validation and test sets, since the images (at least in the original GTSRB) exist in sets of 30 images of the same sign. You'd have to be careful not to include a different instance of the exact same sign in the training and validation sets. 
 
-To cross validate my model, I randomly split the training data into a training set and validation set. I did this by ...
+The number of examples in each set was mentioned above but I repeat the info here for convenience:
 
-My final training set had X number of images. My validation set and test set had Y and Z number of images.
+* The size of training set is 34799
+* The size of validation set is 4410
 
-The sixth code cell of the IPython notebook contains the code for augmenting the data set. I decided to generate additional data because ... To add more data to the the data set, I used the following techniques because ... 
+#####Image Augmentation
+The code for this step is in code cell 5.
 
-Here is an example of an original image and an augmented image:
+I create an image augmentation sequence that consists of:
 
-![alt text][image3]
+* Random brightness from 75% to 125% of the original
+* Random translation +-4 pixels
+* Random rotation +-5 degrees
+* Random shearing +-8 degrees
 
-The difference between the original data set and the augmented data set is the following ... 
+The transformations are subtle based on the assumption that the sign detection front-end of a real-world system should behave reasonably. The sequence is meant to perturb the image and encourage the network to be invariant/robust to variations that may naturally occur due to time of day, cameral angle, sign detector error, etc. The sequence defined here is used later at experimentation runtime so I can permute the use of different numbers of augmentation images. Here is a visual example of 64 realizations of the random augmentation sequence:
 
+![Original Image][image3.0]
+
+![64 Augmentation Examples][image3.1]
 
 ####3. Describe, and identify where in your code, what your final model architecture looks like including model type, layers, layer sizes, connectivity, etc.) Consider including a diagram and/or table describing the final model.
 
@@ -108,18 +130,20 @@ The code for my final model is located in the seventh cell of the ipython notebo
 
 My final model consisted of the following layers:
 
-| Layer         		|     Description	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Input         		| 32x32x3 RGB image   							| 
-| Convolution 3x3     	| 1x1 stride, same padding, outputs 32x32x64 	|
-| RELU					|												|
-| Max pooling	      	| 2x2 stride,  outputs 16x16x64 				|
-| Convolution 3x3	    | etc.      									|
-| Fully connected		| etc.        									|
-| Softmax				| etc.        									|
-|						|												|
-|						|												|
- 
+| Layer           | Description                                                                             |
+|:----------------|:----------------------------------------------------------------------------------------|
+| Input           | 32x32x3 RGB Image                                                                       |
+| Convolution 5x5 | 1x1 stride, valid padding, outputs 28x28x6                                              |
+| tanh            | nan                                                                                     |
+| Max Pooling     | 2x2 stride,  outputs 14x14x6                                                            |
+| Convolution 5x5 | 1x1 stride, valid padding, outputs 10x10x16                                             |
+| tanh            | nan                                                                                     |
+| Max Pooling     | 2x2 stride, outputs 5x5x16                                                              |
+| Flatten         | outputs 400                                                                             |
+| Fully Connected | outputs 120                                                                             |
+| Fully Connected | outputs 84                                                                              |
+| Fully Connected | outputs 43 (the number of classes)                                                      |
+| Softmax         | For training; not necessary for classifier deployment if probabilities are not required |
 
 
 ####4. Describe how, and identify where in your code, you trained your model. The discussion can include the type of optimizer, the batch size, number of epochs and any hyperparameters such as learning rate.
