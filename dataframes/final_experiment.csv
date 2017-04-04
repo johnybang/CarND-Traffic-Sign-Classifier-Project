@@ -1,0 +1,2 @@
+act_type,arch,b_conv,b_fc,batch_size,best_epoch,best_iter,best_valid_accy,isgray,kp_conv,kp_fc,learn_rate,norm_type,num_aug,objects,run_time
+tanh,LeNet,0.001,0.001,256,8,1088,0.9530612247601118,False,1,0.5,0.002,MaxScaleMinusMean,0,"(<function train_model.<locals>.preprocess at 0x1112b71e0>, <function train_model.<locals>.evaluate_wrapper at 0x1112b7268>, './lenet5')",20.1643070658048

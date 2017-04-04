@@ -126,7 +126,7 @@ The transformations are subtle based on the assumption that the sign detection f
 
 ####3. Describe, and identify where in your code, what your final model architecture looks like including model type, layers, layer sizes, connectivity, etc.) Consider including a diagram and/or table describing the final model.
 
-The code for my final model is located in the seventh cell of the ipython notebook. 
+The code for my final model is located in the sixth cell of the ipython notebook. 
 
 My final model consisted of the following layers:
 
@@ -148,31 +148,49 @@ My final model consisted of the following layers:
 
 ####4. Describe how, and identify where in your code, you trained your model. The discussion can include the type of optimizer, the batch size, number of epochs and any hyperparameters such as learning rate.
 
-The code for training the model is located in the eigth cell of the ipython notebook. 
+The code for training the model is located in code cells 7 and 8 of the ipython notebook. 
 
-To train the model, I used an ....
+To train the model, I used an Adam optimizer with a cross-entropy loss function of the softmaxed output to the network. Preliminarily, I manually varied batch size, number of epochs, and learning rate as hard-coded fixed constants. 
+
+However, I eventually recognized a need for a framework which would allow me to test various permutations of these parameters and others. Thus, cell 7 became a helper function which encapsulates a single experiment that returns a "best validation accuracy."  I recognized that when I was manually watching an experiment, I tended to decide to stop training when the validation accuracy stopped improving epoch over epoch.  I decided to quantify/automate this by stopping a particular experiment when the validation accuracy (or loss, it's debatable which to use) hadn't improved for 5 epochs in a row.  This ultimately enabled me to automate various permutations of experiments without babysitting each and every one. Batch size and learning rate were studied using this trial automation framework.
 
 ####5. Describe the approach taken for finding a solution. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
 
-The code for calculating the accuracy of the model is located in the ninth cell of the Ipython notebook.
+The code for calculating the accuracy of the model is located in code cell 8 and 9 of the Ipython notebook.
+
+As I described above, the seventh cell contains a function encapsulating a training session of an arbitrary parameter set. The eighth cell uses [itertools.product()](https://docs.python.org/3/library/itertools.html) to iterate through all permutations of interest. The result of each permuation is printed in markdown-friendly format using [tabulate()](https://pypi.python.org/pypi/tabulate) and is also written to a csv using [pandas.DataFrame.to_csv()](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html).
 
 My final model results were:
-* training set accuracy of ?
-* validation set accuracy of ? 
-* test set accuracy of ?
 
-If an iterative approach was chosen:
+* training set accuracy of 98.8%
+* validation set accuracy of 95.3% 
+* test set accuracy of 93.9%
+
+##### Core Questions
+
 * What was the first architecture that was tried and why was it chosen?
+  * My first architecture was LeNet5. This architecture had been used to successfully classify images of handwritten digits. Although the task was not identical to our current task, it was indeed an image classification task.
 * What were some problems with the initial architecture?
+  * One thing to watch out for would potentially be that the digit recognition task seems less complex. For instance, the digit images were grayscale and there were only 10 output classes.
 * How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to over fitting or under fitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.
+  * I first did the parameter sweep on LeNet5 which I describe in the next question. However, I being somewhat unsatisfied with my ~96%-97% validation accuracy, I decided to try a few things without initial success. I didn't ultimately have time to figure out how to make them bear fruit, though I still believe they would with sufficient time to carefully debug and analyze. I describe them in my "Loose Ends" section below after the core questions.
 * Which parameters were tuned? How were they adjusted and why?
+  * I initially did a few experiments to settle on some of the basics. I wanted to choose a batch size, learning rate, and normalization preprocessing which I could stick with for the remainder of experimentation. I tried various permuations, eventually settling on 256, 0.002, and MaxScaleMinusMean (as described above) respectively.
+  * Thereafter, I suspected overfitting may be occurring due to high training accuracy (~99%) vs. lower validation accurcay (~90%). I incorporated various amounts of L2 regularization and added Dropout layers. I had separate tuning coefficients (beta and dropout probability) in the convolutional and fully connected layers of the model as I had read that some practitioners opt not to use dropout, for instance, in the convolutional layers. Ultimately, dropout seemed to help the most.
 * What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
+  * It's important to use convolutional layers to build a meaningfully heirarchical feature-detection frontend for the fully connected classifier at the backend. Dropout layers are a powerful way to prevent overfitting by keeping various neurons from becoming overly reliant on each other's information. Another pleasing way to think of Dropout is that it is a way of training an exponential number of networks (albeit not completely independet) and taking an ensemble of their results. The use of ensembles of predictors is known to help with the variance of any particular one, hence it helps with overfitting.
 
-If a well known architecture was chosen:
-* What architecture was chosen?
-* Why did you believe it would be relevant to the traffic sign application?
-* How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
- 
+##### Loose Ends
+Being somewhat unsatisfied with my ~96%-97% validation accuracy, I decided to try a few things without initial success. I didn't ultimately have time to figure out how to make them bear fruit, though I still believe they would with sufficient time to carefully debug and analyze. Here they are:
+
+* Data augmentation
+  * I added random translation, rotation, and shearing as described above, but sadly this didn't yield an improvement for any of the architectures under test. It even showed degradation; perhaps my perturbations are too dramatic? I'll have to revisit this and debug/analyze when I have time in the future.
+* LeNetComplexified
+  * This was my attempt to be inspired by [this post](https://chatbotslife.com/german-sign-classification-using-deep-learning-neural-networks-98-8-solution-d05656bf51ad). I added an extra convolutional layer and increased the number of filters in each one by quite a bit. Unfortunately, probably through a fault of my own, it didn't produce an improvement for me. Additionally, the AWS g2.2xlarge EC2 wasn't plugging through this very quickly, limiting the ability to do efficient debugging/experimentation.
+* LeNetMultilevel
+  * This was my attempt to be inspired by [this Udacity student's project](https://github.com/jeremy-shannon/CarND-Traffic-Sign-Classifier-Project/blob/master/Traffic_Sign_Classifier.ipynb) and the multilevel feature idea proposed in [this Sermanet et al paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf).
+  * I sent the first convolutional layers to the fully connected network along with the second layer. No improvement right off the bat, so I'll have to revisit this in the future.
+
 
 ###Test a Model on New Images
 
