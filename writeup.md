@@ -1,8 +1,9 @@
 #**Traffic Sign Recognition** 
+John Bang, 4/8/17
 
 ##Overview
 
-###As a part of the Udacity Self-Driving Car Engineer Nanodegree program, I build a traffic sign recognition classifier using the German Traffic Sign Recognition Benchmark (GTSRB) dataset. The educational motive is to put into practice convolutional neural networks and deep learning on a classification task. 
+###As a part of the Udacity Self-Driving Car Engineer Nanodegree program, I build a traffic sign recognition classifier using the German Traffic Sign Recognition Benchmark (GTSRB) dataset. The educational motive is to put into practice convolutional neural networks and deep learning on a classification task.
 
 ---
 
@@ -26,13 +27,8 @@ The goals / steps of this project are the following:
 [image2.1]: ./data_visualizations/4_grayscaled_training_images.jpg "4 Grayscaled Images with Sign Lables"
 [image3.0]: ./data_visualizations/original_training_image.jpg "Original Image"
 [image3.1]: ./data_visualizations/64_augmentation_examples.jpg "64 Augmentation Examples"
-[image2]: ./examples/grayscale.jpg "Grayscaling"
-[image3]: ./examples/random_noise.jpg "Random Noise"
-[image4]: ./examples/placeholder.png "Traffic Sign 1"
-[image5]: ./examples/placeholder.png "Traffic Sign 2"
-[image6]: ./examples/placeholder.png "Traffic Sign 3"
-[image7]: ./examples/placeholder.png "Traffic Sign 4"
-[image8]: ./examples/placeholder.png "Traffic Sign 5"
+[image4.0]: ./data_visualizations/web_image_resizing.jpg "Web Images and Their Resized Versions"
+[image4.1]: ./data_visualizations/web_image_top5.jpg "Web Image Top 5 Predicted Classes"
 
 ## Rubric Points
 ###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/481/view) individually and describe how I addressed each point in my implementation.  
@@ -42,7 +38,7 @@ The goals / steps of this project are the following:
 
 ####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one. You can submit your writeup as markdown or pdf. You can use this template as a guide for writing the report. The submission includes the project code.
 
-You're reading it! and here is a link to my [project code](https://github.com/johnybang/CarND-Traffic-Sign-Classifier-Project/blob/master/Traffic_Sign_Classifier.ipynb)
+You're reading it! Admittedly, my jupyter notebook code could use a bit of refactoring, cleanup and additional comments, but it is functional and should be readable as it pertains to a high level view of what is being accomplished, especially since it's written in python. Here is a link to my [project code](https://github.com/johnybang/CarND-Traffic-Sign-Classifier-Project/blob/master/Traffic_Sign_Classifier.ipynb).
 
 ###Data Set Summary & Exploration
 
@@ -126,7 +122,7 @@ The transformations are subtle based on the assumption that the sign detection f
 
 ####3. Describe, and identify where in your code, what your final model architecture looks like including model type, layers, layer sizes, connectivity, etc.) Consider including a diagram and/or table describing the final model.
 
-The code for my final model is located in the sixth cell of the ipython notebook. 
+The code for my final model is located in the sixth cell of the ipython notebook, the function LeNet(). 
 
 My final model consisted of the following layers:
 
@@ -156,14 +152,14 @@ However, I eventually recognized a need for a framework which would allow me to 
 
 ####5. Describe the approach taken for finding a solution. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
 
-The code for calculating the accuracy of the model is located in code cell 8 and 9 of the Ipython notebook.
+The code for calculating the final accuracy of the model is located in code cell 11 of the Ipython notebook.
 
 As I described above, the seventh cell contains a function encapsulating a training session of an arbitrary parameter set. The eighth cell uses [itertools.product()](https://docs.python.org/3/library/itertools.html) to iterate through all permutations of interest. The result of each permuation is printed in markdown-friendly format using [tabulate()](https://pypi.python.org/pypi/tabulate) and is also written to a csv using [pandas.DataFrame.to_csv()](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html).
 
 My final model results were:
 
-* training set accuracy of 98.8%
-* validation set accuracy of 95.3% 
+* training set accuracy of 98.9%
+* validation set accuracy of 96.4% 
 * test set accuracy of 93.9%
 
 ##### Core Questions
@@ -180,6 +176,63 @@ My final model results were:
 * What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
   * It's important to use convolutional layers to build a meaningfully heirarchical feature-detection frontend for the fully connected classifier at the backend. Dropout layers are a powerful way to prevent overfitting by keeping various neurons from becoming overly reliant on each other's information. Another pleasing way to think of Dropout is that it is a way of training an exponential number of networks (albeit not completely independet) and taking an ensemble of their results. The use of ensembles of predictors is known to help with the variance of any particular one, hence it helps with overfitting.
 
+##### Example Outcomes of Core Iterative Experimentation
+The following table shows the data that led me to my final set of parameters, sorted by validation accuracy; some (perhaps most) differences in performance are admittedly statistically insignificant and/or can be attributed to random data order shuffling. Nonetheless, I finalized on the parameter set that produced the best validation accuracy on these experiments.
+
+What the fields mean:
+
+* act\_type: activation
+* b\_conv: L2 reg param, convolutional layers
+* b\_fc: L2 reg param, fully connected layers
+* batch\_size: number of examples per call to training\_operation
+* best\_epoch: best epoch (number of passes through the entire dataset)
+* best\_iter: best iteration (number of calls to training_operation)
+* best\_valid\_accy: best validation accy out of all epochs tested (experiment stops when 5 epochs in a row don't improve)
+* kp\_conv: keep probability, convolutional layers
+* kp\_fc: keep probability, fully connected layers
+* learn\_rate: perhaps a little weird to try different values for Adam optimizer, but I did it nonetheless
+* norm\_type: normalization approaches described above
+* run\_time: compute time for the experiment in minutes
+
+| act_type   |   b_conv |   b_fc |   batch_size |   best_epoch |   best_iter |   best\_valid\_accy |   kp_conv |   kp_fc |   learn_rate | norm_type         |   run_time |
+|:-----------|---------:|-------:|-------------:|-------------:|------------:|------------------:|----------:|--------:|-------------:|:------------------|-----------:|
+| tanh       |    0.001 |  0.001 |          256 |           22 |        2992 |          0.970975 |       1   |     0.5 |        0.002 | MaxScaleMinusMean |   2.09816  |
+| tanh       |    0     |  0.001 |          256 |           33 |        4488 |          0.968027 |       1   |     0.5 |        0.002 | MaxScaleMinusMean |   2.93872  |
+| tanh       |    0.001 |  0.001 |          256 |           18 |        2448 |          0.965533 |       1   |     0.5 |        0.002 | MaxScale          |   1.69413  |
+| tanh       |    0.001 |  0.001 |          256 |           16 |        2176 |          0.965533 |       1   |     0.5 |        0.002 | ImageStandardize  |   1.50452  |
+| tanh       |    0.001 |  0     |          256 |           17 |        2312 |          0.962132 |       1   |     0.5 |        0.002 | MaxScaleMinusMean |   1.7112   |
+| relu       |    0     |  0.001 |          256 |           18 |        2448 |          0.962132 |       1   |     0.5 |        0.002 | MaxScaleMinusMean |   1.7205   |
+| tanh       |    0.001 |  0.001 |          256 |           38 |        5168 |          0.961905 |       1   |     0.5 |        0.001 | MaxScaleMinusMean |   3.15909  |
+| tanh       |    0     |  0.001 |          256 |           44 |        5984 |          0.961451 |       1   |     0.5 |        0.001 | MaxScaleMinusMean |   3.5172   |
+| tanh       |    0     |  0     |          256 |           18 |        2448 |          0.960544 |       1   |     0.5 |        0.002 | MaxScaleMinusMean |   1.88612  |
+| tanh       |    0     |  0.001 |          256 |           42 |        5712 |          0.95873  |       1   |     1   |        0.002 | MaxScaleMinusMean |   3.6656   |
+| relu       |    0     |  0     |          256 |           23 |        3128 |          0.956916 |       1   |     0.5 |        0.002 | MaxScaleMinusMean |   2.14523  |
+| tanh       |    0.001 |  0     |          256 |           19 |        2584 |          0.956236 |       1   |     1   |        0.002 | MaxScaleMinusMean |   1.8585   |
+| relu       |    0.001 |  0     |          256 |           21 |        2856 |          0.955556 |       1   |     0.5 |        0.002 | MaxScaleMinusMean |   1.94728  |
+| relu       |    0.001 |  0.001 |          256 |           25 |        3400 |          0.94966  |       1   |     0.5 |        0.002 | MaxScaleMinusMean |   2.2471   |
+| relu       |    0     |  0     |          256 |           46 |        6256 |          0.949433 |       0.5 |     0.5 |        0.002 | MaxScaleMinusMean |   3.86023  |
+| tanh       |    0.001 |  0.001 |          256 |           22 |        2992 |          0.948753 |       1   |     1   |        0.002 | MaxScaleMinusMean |   2.09331  |
+| tanh       |    0     |  0     |          256 |           11 |        1496 |          0.945125 |       1   |     1   |        0.002 | MaxScaleMinusMean |   1.24519  |
+| relu       |    0.001 |  0.001 |          256 |           16 |        2176 |          0.943537 |       1   |     1   |        0.002 | MaxScaleMinusMean |   1.60393  |
+| relu       |    0     |  0.001 |          256 |           42 |        5712 |          0.94263  |       0.5 |     0.5 |        0.002 | MaxScaleMinusMean |   3.6258   |
+| relu       |    0.001 |  0.001 |          256 |           40 |        5440 |          0.941723 |       0.5 |     0.5 |        0.002 | MaxScaleMinusMean |   3.56088  |
+| tanh       |    0     |  0     |          256 |           15 |        2040 |          0.934694 |       0.5 |     0.5 |        0.002 | MaxScaleMinusMean |   1.55082  |
+| tanh       |    0     |  0     |          256 |           19 |        2584 |          0.9322   |       0.5 |     1   |        0.002 | MaxScaleMinusMean |   1.86198  |
+| tanh       |    0.001 |  0.001 |          256 |           38 |        5168 |          0.930839 |       0.5 |     1   |        0.002 | MaxScaleMinusMean |   3.30828  |
+| relu       |    0.001 |  0     |          256 |           25 |        3400 |          0.928798 |       0.5 |     0.5 |        0.002 | MaxScaleMinusMean |   2.30266  |
+| tanh       |    0.001 |  0     |          256 |           25 |        3400 |          0.927438 |       0.5 |     0.5 |        0.002 | MaxScaleMinusMean |   2.31044  |
+| tanh       |    0.001 |  0     |          256 |           11 |        1496 |          0.925397 |       0.5 |     1   |        0.002 | MaxScaleMinusMean |   1.24426  |
+| relu       |    0     |  0.001 |          256 |           40 |        5440 |          0.92449  |       0.5 |     1   |        0.002 | MaxScaleMinusMean |   3.38724  |
+| relu       |    0     |  0     |          256 |           29 |        3944 |          0.924263 |       0.5 |     1   |        0.002 | MaxScaleMinusMean |   2.55995  |
+| tanh       |    0.001 |  0.001 |          256 |           28 |        3808 |          0.92381  |       0.5 |     0.5 |        0.002 | MaxScaleMinusMean |   2.5358   |
+| relu       |    0     |  0.001 |          256 |           12 |        1632 |          0.921995 |       1   |     1   |        0.002 | MaxScaleMinusMean |   1.29116  |
+| relu       |    0.001 |  0.001 |          256 |           23 |        3128 |          0.914059 |       0.5 |     1   |        0.002 | MaxScaleMinusMean |   2.08646  |
+| tanh       |    0     |  0.001 |          256 |           18 |        2448 |          0.912245 |       0.5 |     0.5 |        0.002 | MaxScaleMinusMean |   1.76894  |
+| tanh       |    0     |  0.001 |          256 |           15 |        2040 |          0.910884 |       0.5 |     1   |        0.002 | MaxScaleMinusMean |   1.50905  |
+| relu       |    0.001 |  0     |          256 |            8 |        1088 |          0.910431 |       1   |     1   |        0.002 | MaxScaleMinusMean |   1.00921  |
+| relu       |    0     |  0     |          256 |            7 |         952 |          0.908617 |       1   |     1   |        0.002 | MaxScaleMinusMean |   0.901069 |
+| relu       |    0.001 |  0     |          256 |           21 |        2856 |          0.908617 |       0.5 |     1   |        0.002 | MaxScaleMinusMean |   1.95833  |
+
 ##### Loose Ends
 Being somewhat unsatisfied with my ~96%-97% validation accuracy, I decided to try a few things without initial success. I didn't ultimately have time to figure out how to make them bear fruit, though I still believe they would with sufficient time to carefully debug and analyze. Here they are:
 
@@ -194,45 +247,60 @@ Being somewhat unsatisfied with my ~96%-97% validation accuracy, I decided to tr
 
 ###Test a Model on New Images
 
-####1. Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
+####1. Choose 9 German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
 
-Here are five German traffic signs that I found on the web:
+Here are five German traffic signs that I found on the web as well as its manually cropped/resized counterpart to be used in test. The resizing is done in code cell 12:
 
-![alt text][image4] ![alt text][image5] ![alt text][image6] 
-![alt text][image7] ![alt text][image8]
+![web images and cropped/resized versions][image4.0]
 
-The first image might be difficult to classify because ...
+Some comments regarding each image:
+
+1. **children.jpeg:** This will likely be easy to classify, but perhaps the remainder of the Kindergarten portion could add slight confusion.
+2. **danger\_manface.jpeg:** Though most of the sign is captured very well, the man's face may be confusing.
+3. **double\_curve.jpeg:** The smallness and skewed angle of the primary sign as well as the inclusion of the secondary sign underneath may make this difficult.
+4. **no\_stopping.jpeg:** This is a good shot of the sign, but not examples of this sign type exist in the original dataset, thus it will not make a correct predicition. It will make an incorrect guess.
+5. **pedestrian\_speed\_30.jpeg:** The smallness of the two signs and the inclusion of two signs simultaneously will make this very difficult to get even half correct. Whether this would occur in a real system depends on the sign-detection algorithm's behavior.
+6. **restricted\_no\_stopping.jpeg:** This is a good shot of the sign, but not examples of this sign type exist in the original dataset, thus it will not make a correct predicition. It will make an incorrect guess.
+7. **speed\_60.jpeg:** This is a pretty good shot; should be easier to classify.
+8. **speed\_130.jpeg:** This is a good shot, but this speed is not included in the original dataset, thus it will make an incorrect guess.
+9. **stop.jpeg:** This is an ideal angle and lighting scenario; should be easy.
 
 ####2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. Identify where in your code predictions were made. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
 
-The code for making predictions on my final model is located in the tenth cell of the Ipython notebook.
+The code for making predictions on my final model are located in the 13th and 14th cells of the Ipython notebook.
 
 Here are the results of the prediction:
 
-| Image			        |     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Stop Sign      		| Stop sign   									| 
-| U-turn     			| U-turn 										|
-| Yield					| Yield											|
-| 100 km/h	      		| Bumpy Road					 				|
-| Slippery Road			| Slippery Road      							|
+| Actual                               | isCorrect   | isIn43Classes   | Predicted            |
+|:-------------------------------------|:------------|:----------------|:---------------------|
+| Children crossing                    | True        | True            | Children crossing    |
+| General caution                      | True        | True            | General caution      |
+| Double curve                         | False       | True            | No entry             |
+| No stopping                          | False       | False           | Speed limit (30km/h) |
+| Pedestrians and Speed limit (30km/h) | False       | False           | Priority road        |
+| Restricted no stopping               | False       | False           | Speed limit (30km/h) |
+| Speed limit (60km/h)                 | True        | True            | Speed limit (60km/h) |
+| Speed limit (130km/h)                | False       | False           | Speed limit (30km/h) |
+| Stop                                 | True        | True            | Stop                 |
 
+Among the 5 images that are among the 43 sign classes in the GTSRB dataset, 4 out of 5 or 80% were predicted correctly. This 80% number is appropriately in the ballpark of the 94% test accuracy computed on the GTSRB dataset.
 
-The model was able to correctly guess 4 of the 5 traffic signs, which gives an accuracy of 80%. This compares favorably to the accuracy on the test set of ...
+On the other hand, the model was only able to correctly guess 4 out of all 9 traffic signs or 44% when including classes outside the GTSRB dataset. This motivates some careful thought about the probability of seeing an out-of-dataset sign class and the potential severity of an incorrectly guessed class. I suspect there would at least need to be some prediction probability threshold (and/or a minimum relative probability between the top 2 predicitons) beneath which the system should return a None response to be safe.
 
 ####3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction and identify where in your code softmax probabilities were outputted. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
 
-The code for making predictions on my final model is located in the 11th cell of the Ipython notebook.
+The code for visualizing softmax probabilites of these web images is in the 14th cell of the Ipython notebook.
 
-For the first image, the model is relatively sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
+![web images with top 5 prediction probabilities][image4.1]
 
-| Probability         	|     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
+Some comments regarding each image:
 
-
-For the second image ... 
+1. **Children crossing:** This one seems straightforward for the classifier at 95% softmax probability for the correct outcome.
+2. **General caution:** This is even more confident at 99.6% for the correct outcome despite the man's face.
+3. **Double curve:** The top probability was appropriately low at 55% given that it was an incorrect outcome. The fact that the image was a skewed angle, poorly cropped and included the supplemental sign underneath all may have contributed to this sign's failure.  In addition, the prior probability of this sign type imposed by the relative number of examples of this sign type in the GTSRB dataset is quite low, thus decreasing the likelihood of properly identifying this particular sign type. It would be good to consider carefully modifying the relative frequency of sign types in the original dataset according to not only the probability of encounter but the potential negative cost of misidentification or lack of identification.
+4. **No stopping:** Being a class outside the dataset, this sign interestingly is somewhat split on whether it might be one of two incorrect signs at around 40% each. It makes sense that the relative frequency of Speed limit (30km/h) in the GTSRB dataset would make it more likely to come up here in a wild-guess situation.
+5. **Pedestrians and Speed limit (30km/h):** Poor confidence. Top number at only 30%.
+6. **Restricted no stopping:** Again, not in the dataset classes, but the highest probability is a somewhat high 65% for the prior-biased 30km/h sign. This indicates that a "unknown" probability threshold would likely need to be higher than 65% (unless this one example is a lone outlier).
+7. **Speed limit (60km/h):** Easy one at 94% confidence on the right answer.
+8. **Speed limit (130km/h):** This is perhaps the trickiest. It is 97% confident that it is a 30km/h sign and it indeed is very similar except for the number one preceding the number 3 on the sign. Something would certainly need to be done to generalize speed limit sign value detection/classification, perhaps a number detector one step deeper after "speed limit" class is found. At the very least, it would need to return "unknown". It seems unsafe for the car to suddenly think the speed limit is 30km/h rather than 130km/h on the highway! Of course, other context would probably prevent such a catastrophe in real life. Then again, at least it didn't mistake a 30km/h sign for a 130km/h sign which would be more likely to occur if both sign types existed in the GTSRB dataset...
+9. **Stop:** Clearly the easiest of the bunch. 99.8% confident on the correct outcome.

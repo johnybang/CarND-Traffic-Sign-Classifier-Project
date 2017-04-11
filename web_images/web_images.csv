@@ -1,9 +1,1 @@
-web_images/children.jpeg,28
-web_images/danger_manface.jpeg,18
-web_images/double_curve.jpeg,21
-web_images/no_stopping.jpeg,17
-web_images/pedestrian_speed_30.jpeg,2701
-web_images/restricted_no_stopping.jpeg,
-web_images/speed_60.jpeg,3
-web_images/speed_130.jpeg
-web_images/stop.jpeg,14
+filename,text_label,numeric_label,is_among_43_classesweb_images/children.jpeg,Children crossing,28,TRUEweb_images/danger_manface.jpeg,General caution,18,TRUEweb_images/double_curve.jpeg,Double curve,21,TRUEweb_images/no_stopping.jpeg,No stopping,,FALSEweb_images/pedestrian_speed_30.jpeg,Pedestrians and Speed limit (30km/h),,FALSEweb_images/restricted_no_stopping.jpeg,Restricted no stopping,,FALSEweb_images/speed_60.jpeg,Speed limit (60km/h),3,TRUEweb_images/speed_130.jpeg,Speed limit (130km/h),,FALSEweb_images/stop.jpeg,Stop,14,TRUE
